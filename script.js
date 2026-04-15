@@ -22,7 +22,7 @@ topicSelect.addEventListener('change', async () => {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-search-preview',
 
         messages: [
           {
@@ -33,19 +33,26 @@ topicSelect.addEventListener('change', async () => {
             role: 'user',
             content: prompt
           }
-        ]
+        ],
+
+        web_search_options: {}
       })
     });
 
     // Parse the response
     const data = await response.json();
     
+    // Function to convert markdown links to HTML links
+    const convertLinks = (text) => {
+      return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    };
+    
     // Format and update the UI with the response
     const text = data.choices[0].message.content;
     const formattedText = text
       .split('\n\n')  // Split into paragraphs
       .filter(para => para.trim() !== '')  // Remove empty paragraphs
-      .map(para => `<p>${para}</p>`)  // Wrap in p tags
+      .map(para => `<p>${convertLinks(para)}</p>`)  // Convert links and wrap in p tags
       .join('');
     
     responseDiv.innerHTML = formattedText;
